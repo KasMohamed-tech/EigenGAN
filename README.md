@@ -89,10 +89,8 @@ To test a trained generator on a given task please run the following command usi
     python test.py --dataroot datasets/LLVIP --model pix2pix --load_size 480 --crop_size 480 --gpu_ids 0,1 --netG resnet_9blocks --batch_size 8 --verbose --name LLVIP_resnet_pixel --eval
   ```
 To find the used parameters please check the config file located in `checkpoints/experiment_name/train_opt.txt`. 
-The results will be savec in `results/experiment_name/`
+The results will be saved in `results/experiment_name/`
 
 #
-This repo is still under developement and many materials will be shared in the future (checkpoints, results, explanations, ....). 
+This repo is still under development and many materials will be shared in the future (checkpoints, results, explanations, ....). 
 Thank you for your understanding.
-
-
