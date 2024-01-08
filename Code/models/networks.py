@@ -373,7 +373,7 @@ class ResnetGenerator(nn.Module):
     We adapt Torch code and idea from Justin Johnson's neural style transfer project(https://github.com/jcjohnson/fast-neural-style)
     """
 
-    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, n_blocks=6, load_size=256, padding_type='reflect'):
+    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, n_blocks=6, load_size=256, padding_type='reflect',  expansion_factor = 2):
         """Construct a Resnet-based generator
 
         Parameters:
@@ -418,7 +418,7 @@ class ResnetGenerator(nn.Module):
                       norm_layer(int(ngf * mult / 2)),
                       nn.ReLU(True)]
         model += [nn.ReflectionPad2d(3)]
-        model += [nn.Conv2d(ngf, output_nc , kernel_size=7, padding=0)]
+        model += [nn.Conv2d(ngf, output_nc * expansion_factor , kernel_size=7, padding=0)]
 
         self.model = nn.Sequential(*model)
 
@@ -429,33 +429,9 @@ class ResnetGenerator(nn.Module):
 
         self.final_CNN =  nn.Sequential(
                             nn.ReflectionPad2d(1),
-                            nn.Conv2d(output_nc,output_nc, kernel_size=3),
+                            nn.Conv2d(output_nc * expansion_factor,output_nc, kernel_size=3),
                             nn.Tanh()
             )
-
-        # for i in range(n_downsampling):  # add upsampling layers
-        #     mult = 2 ** (n_downsampling-i)
-        #     model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
-        #                                  kernel_size=3, stride=2,
-        #                                  padding=1, output_padding=1,
-        #                                  bias=use_bias),
-        #               norm_layer(int(ngf * mult / 2)),
-        #               nn.ReLU(True)]
-        
-        # self.model = nn.Sequential(*model)
-        
-        # self.S_enhancer = nn.Sequential(
-        #                       nn.Linear(load_size,512),
-        #                       nn.Linear(512,load_size)
-        #         )
-            
-
-
-        # self.final_CNN = nn.Sequential(
-        #             nn.ReflectionPad2d(3),
-        #             nn.Conv2d(ngf, output_nc , kernel_size=7, padding=0),
-        #             nn.Tanh()
-        # )
 
 
     def forward(self, input, gt):
@@ -480,9 +456,6 @@ class ResnetGenerator(nn.Module):
 
         return out, S, S_e, S_real, x_feat, gt_feat, y
 
-    # def forward(self, input):
-    #     """Standard forward"""
-    #     return self.model(input)
 
 class SVDBlock(nn.Module):
 
@@ -570,7 +543,7 @@ class ResnetBlock(nn.Module):
 class UnetGenerator(nn.Module):
     """Create a Unet-based generator"""
 
-    def __init__(self, input_nc, output_nc, num_downs, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, load_size=256):
+    def __init__(self, input_nc, output_nc, num_downs, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, load_size=256, expansion_factor = 2):
         """Construct a Unet generator
         Parameters:
             input_nc (int)  -- the number of channels in input images
@@ -592,7 +565,7 @@ class UnetGenerator(nn.Module):
         unet_block = UnetSkipConnectionBlock(ngf * 4, ngf * 8, input_nc=None, submodule=unet_block, norm_layer=norm_layer)
         unet_block = UnetSkipConnectionBlock(ngf * 2, ngf * 4, input_nc=None, submodule=unet_block, norm_layer=norm_layer)
         unet_block = UnetSkipConnectionBlock(ngf, ngf * 2, input_nc=None, submodule=unet_block, norm_layer=norm_layer)
-        self.model = UnetSkipConnectionBlock(output_nc, ngf, input_nc=input_nc, submodule=unet_block, outermost=True, norm_layer=norm_layer)  # add the outermost layer
+        self.model = UnetSkipConnectionBlock(output_nc * expansion_factor, ngf, input_nc=input_nc, submodule=unet_block, outermost=True, norm_layer=norm_layer)  # add the outermost layer
 
         self.S_enhancer = nn.Sequential(
                               nn.Linear(load_size,512),
@@ -601,7 +574,7 @@ class UnetGenerator(nn.Module):
 
         self.final_CNN =  nn.Sequential(
                             nn.ReflectionPad2d(1),
-                            nn.Conv2d(output_nc,output_nc, kernel_size=3),
+                            nn.Conv2d(output_nc * expansion_factor,output_nc, kernel_size=3),
                             nn.Tanh()
             )
         
@@ -903,7 +876,7 @@ class Inception(nn.Module):
         conv_depths=conv_depths=(64, 128, 256, 512, 1024)
         assert len(conv_depths) > 2, 'conv_depths must have at least 3 members'
         in_channels=input_nc
-        out_channels=output_nc * 4
+        out_channels=output_nc * expansion_factor
 
         # defining encoder layers
         encoder_layers = []
