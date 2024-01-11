@@ -76,7 +76,7 @@ $EigenGAN/Code/datasets
 The training parameters are shared between base_options.py and train_options.py. Most of them are set to the optimal values and some of them are included inline when running the training depending on the considered dataset, generator, discriminator, batch size, gpu ids, and experiment name.
 - Before running the train script, we should run the visualizers on separate shells: 
   -  Visdom to view train images and losses :  run `python -m visdom.server` and click the URL http://localhost:8097.
-  -  TensorBoard to view train images, losses, features, and weights distributions. please run `tensorboard --logdir ./runs/` and click the URL http://localhost:6060. It helps to compare different experiments and smooth the losses which is not possible with Visdom server in this implementation.
+  -  TensorBoard to view train images, losses, features, and weights distributions. please run `tensorboard --logdir ./runs/` and click the URL http://localhost:6006. It helps to compare different experiments and smooth the losses which is not possible with Visdom server in this implementation.
 - Execute the training command ResNet based generator and Pixel-wise discriminator on LLVIP dataset using two GPUs (as an example):
   ```bash
     python train.py --dataroot datasets/LLVIP --model pix2pix --load_size 480 --crop_size 480 --gpu_ids 0,1 --netG resnet_9blocks --netD pixel --batch_size 8 --verbose --name LLVIP_resnet_pixel
